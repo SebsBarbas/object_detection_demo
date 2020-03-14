@@ -1,0 +1,26 @@
+<annotation>
+  <folder>rondabout_warning</folder>
+  <filename>2375</filename>
+  <path>C:\rondabout_warning\2375.jpg</path>
+  <source>
+    <database>Unknown</database>
+  </source>
+  <size>
+    <width>554</width>
+    <height>409</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+  <object>
+    <name>roundabout_warning</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>178</xmin>
+      <ymin>155</ymin>
+      <xmax>389</xmax>
+      <ymax>338</ymax>
+    </bndbox>
+  </object>
+</annotation>
