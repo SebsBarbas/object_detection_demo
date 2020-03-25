@@ -1,8 +1,4 @@
-import cv2
-
-
-# Load a model imported from Tensorflow
-
+#!/usr/bin/python
 
 import numpy as np
 import cv2
@@ -28,7 +24,7 @@ def main():
                    dtype = np.float32)
     dist = np.array([0.18928948, -0.18577923, -0.00287653, -0.00739736, 0.04164822], dtype = np.float32)
     tensorflowNet = cv2.dnn.readNetFromTensorflow("C:\\Trained Network\\frozen_inference_graph.pb",
-                                                  "C:\\Trained Network\\rondabout_warning.pbtxt")
+                                                  "C:\\Trained Network\\all_signs.pbtxt")
 
     classNames = {1: 'airport', 2: 'dangerous_curve_left', 3: 'dangerous_curve_right', 4: 'follow_left',
                   5: 'follow_right', 6: 'junction', 7: 'no_bicycle', 8: 'no_heavy_truck', 9: 'no_parking',
@@ -36,17 +32,20 @@ def main():
                   13: 'road_narrows_from_right',
                   14: 'roundabout_warning', 15: 'stop'}
 
+    images = ['airport.png', 'dangerous_curve_left.png', 'dangerous_curve_right.png', 'follow_left.png',
+              'follow_right.png', 'junction.png',
+              'no_bicycle.png', 'no_heavy_truck.png', 'no_parking.png', 'no_stopping_and_parking.png',
+              'residential.png', 'road_narrows_from_left.png',
+              'road_narrows_from_right.png', 'roundabout_warning.png', 'stop.png']
+
 
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
+    orb = cv2.ORB_create()
 
     cap = cv2.VideoCapture(0)
 
     keypoints_database = pickle.load(open("keypoints_database.p", "rb"))
 
-
-    images = load_images_from_folder(rootdir)
-    p = 0
-    img = images[0]
 
     while 1:
 
@@ -122,11 +121,11 @@ def main():
                     for cnt in contours:
                         area = cv2.contourArea(cnt)
 
-                        if area > 7000:
+                        if area > 500:
                             approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
                             # print(len(approx))
 
-                            if 8 <= len(approx) <= 9:
+                            if len(approx):
                                 cv2.drawContours(img3, [approx], 0, (0, 255, 0), 2, cv2.LINE_AA)
 
                                 for k in approx:
@@ -136,16 +135,19 @@ def main():
                                     img3 = cv2.circle(img3, (k[0][0], k[0][1]), 5, (0, 0, 255), 1)
                                     img3[k[0][1], k[0][0]] = [0, 0, 255]
 
-                                kp_model, desc_model = unpickle_keypoints(keypoints_database[7])
+                                kp_model, desc_model = unpickle_keypoints(keypoints_database[class_id-1])
                                 curr_grey_img = cv2.cvtColor(img3, cv2.COLOR_BGR2GRAY)
-                                hg, wg = curr_grey_img.shape[:2]
-                                orb_mask = np.zeros((hg, wg), dtype = np.uint8)
-                                orb_mask[roi] = 255
 
-                                kp_image, desc_image = orb.detectAndCompute(cv2.cvtColor(img3, cv2.COLOR_BGR2GRAY), mask = orb_mask)
+
+                                cv2.imshow("Prueba", roi)
+                                kp_image, desc_image = orb.detectAndCompute(roi, mask = None)
+                                img5=cv2.drawKeypoints(roi, kp_image, roi)
+                                cv2.imshow("ORB IMAGEN", img5)
                                 matches = bf.match(desc_model, desc_image)
-                                matches = sorted(matches, key = lambda x: x.distance)[:10]
+                                matches = sorted(matches, key = lambda x: x.distance)[:5]
 
+                                img4 = cv2.drawMatches(cv2.imread(images[class_id-1], cv2.IMREAD_GRAYSCALE), kp_model, roi, kp_image, matches, None, flags = 2)
+                                cv2.imshow("Prueba3", img4)
                                 list_kpmodel=[]
                                 list_kpimage=[]
                                 for mat in matches:
@@ -165,8 +167,10 @@ def main():
 
                                 image_points = np.array(list_kpimage, dtype = np.float32)
                                 model_points = np.array(list_kpmodel, dtype = np.float32)
+                                print(image_points)
+                                print(model_points)
                                 success, rmat, tmat = cv2.solvePnPRansac(model_points, image_points, mtx, dist,
-                                                                         flags = 7)[:3]
+                                                                         flags = 1)[:3]
 
                                 print("Rotation Vector:\n {0}".format(rmat))
                                 print("Translation Vector:\n {0}".format(tmat))
@@ -190,7 +194,7 @@ def main():
                 p = 0
 
         cv2.namedWindow('ORB', cv2.WINDOW_NORMAL)
-        cv2.imshow('ORB', img)
+        cv2.imshow('ORB', img3)
 
 
 if __name__ == '__main__':

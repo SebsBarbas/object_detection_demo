@@ -11,7 +11,8 @@ def pickle_keypoints(keypoints, descriptors):
     for point in keypoints:
         temp = (point.pt, point.size, point.angle, point.response, point.octave,
         point.class_id, descriptors[i])
-        ++i
+        i = i+1
+
         temp_array.append(temp)
     return temp_array
 
@@ -29,14 +30,14 @@ if __name__ == "__main__":
 
     path='C:\\Users\\sebas\\Documents\\Universidad\\Máster\\KTH\\Project Course in Robotics\\PnPRansac\\objects\\'
     orb = cv2.ORB_create()
-    images=['airport.png','dangerous_curve_left.png', 'dangerous_curve_left.png', 'follow_left.png','follow_right.png','junction.png',
-            'no_bicycle.png','no_heavy_truck.png','no_parking.png','no_stopping_and_parking.png','road_narrows_from_left.png',
+    images=['airport.png','dangerous_curve_left.png', 'dangerous_curve_right.png', 'follow_left.png','follow_right.png','junction.png',
+            'no_bicycle.png','no_heavy_truck.png','no_parking.png','no_stopping_and_parking.png', 'residential.png', 'road_narrows_from_left.png',
             'road_narrows_from_right.png','roundabout_warning.png','stop.png']
     temp_a = []
     for l in images:
         img = cv2.imread(l, cv2.IMREAD_GRAYSCALE)
         kp1, des1 = orb.detectAndCompute(img,mask = None)
-        temp = pickle_keypoints(kp1, des1)
+        temp = pickle_keypoints(kp1[:20], des1[:20])
         temp_a.append(temp)
 
     pickle.dump(temp_a, open("keypoints_database.p", "wb"))
@@ -44,6 +45,7 @@ if __name__ == "__main__":
     keypoints_database = pickle.load(open("keypoints_database.p", "rb"))
     kp1, desc1 = unpickle_keypoints(keypoints_database[7])
     img = cv2.imread(images[7], cv2.IMREAD_GRAYSCALE)
+    kp2, desc2 = orb.detectAndCompute(img, mask = None)
 
     """
     index = []
@@ -67,8 +69,14 @@ if __name__ == "__main__":
     """
 
     # Draw the keypoints
-    imm = cv2.drawKeypoints(img, kp1,img)
-    cv2.imshow("Imagen", imm)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = False)
+    matches = bf.match(desc1, desc2)
+    matches = sorted(matches, key = lambda x:x.distance)
+
+    img2 = cv2.drawMatches(img, kp1, img, kp2, matches[:10], None, flags = 2)
+
+    cv2.imshow("Test", img2)
+
     cv2.waitKey(0)
 
 
