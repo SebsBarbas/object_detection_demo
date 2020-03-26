@@ -30,21 +30,24 @@ if __name__ == "__main__":
 
     path='C:\\Users\\sebas\\Documents\\Universidad\\Máster\\KTH\\Project Course in Robotics\\PnPRansac\\objects\\'
     orb = cv2.ORB_create()
-    images=['airport.png','dangerous_curve_left.png', 'dangerous_curve_right.png', 'follow_left.png','follow_right.png','junction.png',
-            'no_bicycle.png','no_heavy_truck.png','no_parking.png','no_stopping_and_parking.png', 'residential.png', 'road_narrows_from_left.png',
-            'road_narrows_from_right.png','roundabout_warning.png','stop.png']
+    images = ['airport.jpg', 'dangerous_curve_left.jpg', 'dangerous_curve_right.jpg', 'follow_left.jpg',
+              'follow_right.jpg', 'junction.jpg',
+              'no_bicycle.jpg', 'no_heavy_truck.png', 'no_parking.jpg', 'no_stopping_and_parking.jpg',
+              'residential.jpg', 'road_narrows_from_left.jpg',
+              'road_narrows_from_right.jpg', 'roundabout_warning.jpg', 'stop.jpg']
+
     temp_a = []
     for l in images:
         img = cv2.imread(l, cv2.IMREAD_GRAYSCALE)
         kp1, des1 = orb.detectAndCompute(img,mask = None)
-        temp = pickle_keypoints(kp1[:20], des1[:20])
+        temp = pickle_keypoints(kp1, des1)
         temp_a.append(temp)
 
     pickle.dump(temp_a, open("keypoints_database.p", "wb"))
 
     keypoints_database = pickle.load(open("keypoints_database.p", "rb"))
-    kp1, desc1 = unpickle_keypoints(keypoints_database[7])
-    img = cv2.imread(images[7], cv2.IMREAD_GRAYSCALE)
+    kp1, desc1 = unpickle_keypoints(keypoints_database[14])
+    img = cv2.imread(images[14], cv2.IMREAD_GRAYSCALE)
     kp2, desc2 = orb.detectAndCompute(img, mask = None)
 
     """
@@ -72,10 +75,10 @@ if __name__ == "__main__":
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = False)
     matches = bf.match(desc1, desc2)
     matches = sorted(matches, key = lambda x:x.distance)
-
+    img1 = cv2.drawKeypoints(img, kp1, img)
     img2 = cv2.drawMatches(img, kp1, img, kp2, matches[:10], None, flags = 2)
 
-    cv2.imshow("Test", img2)
+    cv2.imshow("Test", img1)
 
     cv2.waitKey(0)
 

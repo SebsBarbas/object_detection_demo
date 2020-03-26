@@ -32,11 +32,11 @@ def main():
                   13: 'road_narrows_from_right',
                   14: 'roundabout_warning', 15: 'stop'}
 
-    images = ['airport.png', 'dangerous_curve_left.png', 'dangerous_curve_right.png', 'follow_left.png',
-              'follow_right.png', 'junction.png',
-              'no_bicycle.png', 'no_heavy_truck.png', 'no_parking.png', 'no_stopping_and_parking.png',
-              'residential.png', 'road_narrows_from_left.png',
-              'road_narrows_from_right.png', 'roundabout_warning.png', 'stop.png']
+    images = ['airport.jpg', 'dangerous_curve_left.jpg', 'dangerous_curve_right.jpg', 'follow_left.jpg',
+              'follow_right.jpg', 'junction.jpg',
+              'no_bicycle.jpg', 'no_heavy_truck.png', 'no_parking.jpg', 'no_stopping_and_parking.jpg',
+              'residential.jpg', 'road_narrows_from_left.jpg',
+              'road_narrows_from_right.jpg', 'roundabout_warning.jpg', 'stop.jpg']
 
 
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
@@ -144,7 +144,7 @@ def main():
                                 img5=cv2.drawKeypoints(roi, kp_image, roi)
                                 cv2.imshow("ORB IMAGEN", img5)
                                 matches = bf.match(desc_model, desc_image)
-                                matches = sorted(matches, key = lambda x: x.distance)[:5]
+                                matches = sorted(matches, key = lambda x: x.distance)[:4]
 
                                 img4 = cv2.drawMatches(cv2.imread(images[class_id-1], cv2.IMREAD_GRAYSCALE), kp_model, roi, kp_image, matches, None, flags = 2)
                                 cv2.imshow("Prueba3", img4)
